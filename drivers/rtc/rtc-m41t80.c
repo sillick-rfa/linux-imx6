@@ -913,6 +913,13 @@ static int m41t80_probe(struct i2c_client *client,
 	wakeup_source = of_property_read_bool(client->dev.of_node,
 					      "wakeup-source");
 #endif
+	rtc = devm_rtc_device_register(&client->dev, client->name,
+				       &m41t80_rtc_ops, THIS_MODULE);
+	if (IS_ERR(rtc))
+		return PTR_ERR(rtc);
+
+	m41t80_data->rtc = rtc;
+
 	if (client->irq > 0) {
 		rc = devm_request_threaded_irq(&client->dev, client->irq,
 					       NULL, m41t80_handle_irq,
@@ -923,6 +930,9 @@ static int m41t80_probe(struct i2c_client *client,
 			client->irq = 0;
 			wakeup_source = false;
 		}
+	} else {
+		/* We cannot support UIE mode if we do not have an IRQ line */
+		rtc->uie_unsupported = 1;
 	}
 	if (client->irq > 0 || wakeup_source) {
 		m41t80_rtc_ops.read_alarm = m41t80_read_alarm;
@@ -930,17 +940,6 @@ static int m41t80_probe(struct i2c_client *client,
 		m41t80_rtc_ops.alarm_irq_enable = m41t80_alarm_irq_enable;
 		/* Enable the wakealarm */
 		device_init_wakeup(&client->dev, true);
-	}
-
-	rtc = devm_rtc_device_register(&client->dev, client->name,
-				       &m41t80_rtc_ops, THIS_MODULE);
-	if (IS_ERR(rtc))
-		return PTR_ERR(rtc);
-
-	m41t80_data->rtc = rtc;
-	if (client->irq <= 0) {
-		/* We cannot support UIE mode if we do not have an IRQ line */
-		rtc->uie_unsupported = 1;
 	}
 
 	/* Make sure HT (Halt Update) bit is cleared */
