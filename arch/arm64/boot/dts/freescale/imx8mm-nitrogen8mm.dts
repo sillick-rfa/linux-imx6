@@ -11,11 +11,6 @@
 #include "panel-com50h5n03ulc.dtsi"
 
 &iomuxc {
-	iomuxc_pinctrl: iomuxc-pinctrlgrp {
-	};
-};
-
-&iomuxc_pinctrl {
 	pinctrl_bt_rfkill: bt-rfkillgrp {
 		fsl,pins = <
 #define GP_BT_RFKILL_RESET	<&gpio3 14 GPIO_ACTIVE_LOW>
