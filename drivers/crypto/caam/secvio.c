@@ -345,7 +345,7 @@ static int snvs_secvio_probe(struct platform_device *pdev)
 	svpriv->gpio_tamper = devm_gpiod_get_optional(svdev,
 						      "external-pin-tamper",
 						      GPIOD_IN);
-	if (!IS_ERR(svpriv->gpio_tamper)) {
+	if (!IS_ERR_OR_NULL(svpriv->gpio_tamper)) {
 		dev_dbg(svdev, "Adding tamper external pin control\n");
 		error = devm_request_threaded_irq(svdev,
 					gpiod_to_irq(svpriv->gpio_tamper),
