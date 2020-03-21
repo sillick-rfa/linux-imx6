@@ -679,37 +679,41 @@
 		status = "okay";
 	};
 
-	vpugpu_pd: power-domain@ffffffff {
-		compatible = "fsl,imx8mq-pm-domain";
-		domain-id = <0xffffffff>;
-		domain-name = "VPUGPU_PD";
-		dvfs-supply = <&reg_soc_gpu_vpu>;
-		idle-microvolt = <900000 837000 990000>;
-		#power-domain-cells = <0>;
-
-		gpu_pd: gpc_power_domain@4 {
-			clocks = <&clk IMX8MQ_CLK_GPU_AXI>,
-				<&clk IMX8MQ_CLK_GPU_SHADER_DIV>,
-				<&clk IMX8MQ_CLK_GPU_ROOT>,
-				<&clk IMX8MQ_CLK_GPU_AHB>;
+	power-domains {
+		vpugpu_pd: power-domain@ffffffff {
 			compatible = "fsl,imx8mq-pm-domain";
-			domain-id = <4>;
-			domain-name = "GPU_PD";
-			operating-points-v2 = <&gpu_opp_table>;
+			reg = <0xffffffff>;
+			domain-name = "VPUGPU_PD";
+			dvfs-supply = <&reg_soc_gpu_vpu>;
+			idle-microvolt = <900000 837000 990000>;
+			#address-cells = <1>;
 			#power-domain-cells = <0>;
-		};
+			#size-cells = <0>;
 
-		vpu_pd: gpc_power_domain@5 {
-			clocks = <&clk IMX8MQ_CLK_VPU_G1_ROOT>,
-				<&clk IMX8MQ_CLK_VPU_G2_ROOT>,
-				<&clk IMX8MQ_CLK_VPU_DEC_ROOT>;
-			compatible = "fsl,imx8mq-pm-domain";
-			domain-id = <5>;
-			domain-name = "VPU_PD";
-			operating-points-v2 = <&vpu_opp_table_g1>,
-					<&vpu_opp_table_g2>,
-					<&vpu_opp_table_dec>;
-			#power-domain-cells = <0>;
+			gpu_pd: power-domain@4 {
+				clocks = <&clk IMX8MQ_CLK_GPU_AXI>,
+					 <&clk IMX8MQ_CLK_GPU_SHADER_DIV>,
+					 <&clk IMX8MQ_CLK_GPU_ROOT>,
+					 <&clk IMX8MQ_CLK_GPU_AHB>;
+				compatible = "fsl,imx8mq-pm-domain";
+				reg = <4>;
+				domain-name = "GPU_PD";
+				operating-points-v2 = <&gpu_opp_table>;
+				#power-domain-cells = <0>;
+			};
+
+			vpu_pd: power-domain@5 {
+				clocks = <&clk IMX8MQ_CLK_VPU_G1_ROOT>,
+					 <&clk IMX8MQ_CLK_VPU_G2_ROOT>,
+					 <&clk IMX8MQ_CLK_VPU_DEC_ROOT>;
+				compatible = "fsl,imx8mq-pm-domain";
+				reg = <5>;
+				domain-name = "VPU_PD";
+				operating-points-v2 = <&vpu_opp_table_g1>,
+						<&vpu_opp_table_g2>,
+						<&vpu_opp_table_dec>;
+				#power-domain-cells = <0>;
+			};
 		};
 	};
 };
