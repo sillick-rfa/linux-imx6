@@ -490,6 +490,8 @@ static int ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	int i;
 
 	match = device_get_match_data(&client->dev);
+	if (!match)
+		match = (const struct ft_data *)id->driver_data;
 	if (!match) {
 		dev_err(&client->dev, "unknown device model\n");
 		return -ENODEV;
@@ -705,7 +707,8 @@ const struct ft_data ft7250_data = {
 /*-----------------------------------------------------------------------*/
 
 static const struct i2c_device_id ts_idtable[] = {
-	{ "ft5x06-ts", 0 },
+	{ "ft5x06-ts", .driver_data = (long)&ft5x06_data },
+	{ "ft7250", .driver_data = (long)&ft7250_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, ts_idtable);
