@@ -1386,61 +1386,60 @@ static void sec_mipi_dsim_set_standby(struct sec_mipi_dsim *dsim,
 static int sec_mipi_dsim_get_pms(struct sec_mipi_dsim *dsim, unsigned long bit_clk, unsigned long ref_clk)
 {
 	struct dsim_pll_pms *pms = &dsim->pms;
+	unsigned long b = bit_clk;
 	unsigned long numerator;
 	unsigned long denominator;
-	unsigned max_d = 128*33;
-	unsigned p,m;
+	unsigned p,m, p_min, p_max;
 	unsigned int c_pms;
-	int s = 0;
-	unsigned long b = bit_clk;
+	int shift = 0;
+	int s;
 
 #if 0
 	bit_clk = bit_clk * 4 / 3;
 #endif
-	/* 80 MHz to 750 MHz */
+#define INPUT_MIN_FREQ	6000000
+#define INPUT_MAX_FREQ	12000000
+	/* Table 13-51 */
+	/* Fin 6-200 MHz */
+	/* Fin_pll = Fin /p = 6-12 MHz */
+	/* VCO_out = Fin_pll * m = 350 MHz to 750 MHz */
+	/* Fout = VCO_out >> s = 37.5 MHz to 750 MHz */
 	/* p ranges between 1 and 33 */
 	/* m ranges between 25 and 125 */
-	/* s is power of 2: 1, 2, 4, 8, 16, 32, 64, 128 */
+	/* s ranges between 1 and 7 */
+	p_max = ref_clk / INPUT_MIN_FREQ;
+	if (p_max > 33)
+		p_max = 33;
+	p_min = (ref_clk + INPUT_MAX_FREQ - 1) / INPUT_MAX_FREQ;
+	if (!p_min)
+		p_min = 1;
 	do {
-		numerator = bit_clk << s;
+		numerator = bit_clk << shift;
 		/*
 		 * Increase ref clock so that finding bigger will also find
 		 * very slightly smaller. Needed for rounding errors in
 		 * (pixel clock * 24)
 		 */
 		denominator = ref_clk + 2;
-		get_best_ratio_bigger(&numerator, &denominator, 125, max_d >> s);
-		denominator <<= s;
-		s++;
-	} while ((denominator >> __ffs(denominator)) > 33);
-
-	pr_debug("%s: %ld/%ld = %ld/%ld\n", __func__, numerator, denominator, bit_clk, ref_clk);
-	s = __ffs(denominator);
-	if (s > 7)
-		s = 7;
-	p = denominator >> s;
-	m = numerator;
-#define INPUT_MIN_FREQ	3000000
-#define INPUT_MAX_FREQ	32000000
-	while (ref_clk < INPUT_MIN_FREQ * p) {
-		if (!(p & 1)) {
-			p >>= 1;
-			s++;
-		} else {
-			denominator = p;
-			numerator = m;
-			p = ref_clk / INPUT_MIN_FREQ;
-			m = (numerator * p * 8 + denominator - 1) /denominator;
-			s += 3;
+		get_best_ratio_bigger(&numerator, &denominator, 125, p_max << (7 - shift));
+		denominator <<= shift;
+		s = __ffs(denominator);
+		if (s > 7)
+			s = 7;
+		p = denominator >> s;
+		m = numerator;
+		if ((denominator >= p_min) && (p <= p_max))
 			break;
-		}
-	}
+		shift++;
+	} while (shift < 8);
+
+	pr_debug("%s: %ld/%ld = %ld/%ld p_min=%d p_max=%d p=%d m=%d s=%d \n", __func__, numerator, denominator, bit_clk, ref_clk, p_min, p_max, p, m, s);
 	if (!p) {
 		pr_info("%s: bit_clk=%ld ref_clk=%ld, numerator=%ld, denominator=%ld\n",
 			__func__, bit_clk, ref_clk, numerator, denominator);
 		return -EINVAL;
 	}
-	while (ref_clk > INPUT_MAX_FREQ * p) {
+	while (p < p_min) {
 		p <<= 1;
 		if (s)
 			s--;
@@ -1456,7 +1455,7 @@ static int sec_mipi_dsim_get_pms(struct sec_mipi_dsim *dsim, unsigned long bit_c
 	while (ref_clk * m > OUTPUT_MAX_FREQ * p) {
 		if (!s)
 			break;
-		if (!(m & 1) || (p >= 16))
+		if (!(m & 1) || ((p << 1) > p_max))
 			m = (m + 1) >> 1;
 		else
 			p <<= 1;
