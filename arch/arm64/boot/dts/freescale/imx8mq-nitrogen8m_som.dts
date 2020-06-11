@@ -571,6 +571,12 @@
 		};
 	};
 
+	pcie0_refclk: pcie0-refclk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <100000000>;
+	};
+
 	reg_usb_otg_vbus: regulator-usb-otg-vbus {
 		compatible = "regulator-fixed";
 		pinctrl-names = "default";
@@ -1228,8 +1234,9 @@
 	clocks = <&clk IMX8MQ_CLK_PCIE1_ROOT>,
 		<&clk IMX8MQ_CLK_PCIE1_AUX>,
 		<&clk IMX8MQ_CLK_PCIE1_PHY>,
+		<&pcie0_refclk>,
 		<&clk IMX8MQ_CLK_CLK2_CG>;
-	clock-names = "pcie", "pcie_bus", "pcie_phy", "pcie_ext_src";
+	clock-names = "pcie", "pcie_aux", "pcie_phy", "pcie_bus", "pcie_ext_src";
 	ext_osc = <0>;
 #else
 	ext_osc = <1>;
