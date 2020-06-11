@@ -62,6 +62,12 @@
 			#clock-cells = <0>;
 			clock-frequency = <16000000>;
 		};
+
+		pcie0_refclk: pcie0-refclk {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <100000000>;
+		};
 	};
 
 	sound-wm8960 {
@@ -133,6 +139,11 @@
 &pcie0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pcie0>;
+	clocks = <&clk IMX8MM_CLK_PCIE1_ROOT>,
+		 <&clk IMX8MM_CLK_PCIE1_AUX>,
+		 <&clk IMX8MM_CLK_PCIE1_PHY>,
+		 <&pcie0_refclk>;
+	clock-names = "pcie", "pcie_aux", "pcie_phy", "pcie_bus";
 	disable-gpio = GP_PCIE0_DISABLE;
 	reset-gpio = GP_PCIE0_RESET;
 	ext_osc = <0>;
