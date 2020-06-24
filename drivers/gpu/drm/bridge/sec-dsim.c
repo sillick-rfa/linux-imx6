@@ -1445,18 +1445,18 @@ static int sec_mipi_dsim_get_pms(struct sec_mipi_dsim *dsim, unsigned long bit_c
 			s = 7;
 		p = denominator >> s;
 		m = numerator;
-		if ((p >= p_min) && (p <= p_max))
+		if ((denominator >= p_min) && (p <= p_max))
 			break;
 		i = 2;
 		while ((m * i <= 125) && ((p * i) <= p_max)) {
-			if (p * i >= p_min) {
+			if ((p << s) * i >= p_min) {
 				p *= i;
 				m *= i;
 				break;
 			}
 			i++;
 		}
-		if ((p >= p_min) && (p <= p_max))
+		if (((p << s) >= p_min) && (p <= p_max))
 			break;
 		shift++;
 	} while (shift < 8);
