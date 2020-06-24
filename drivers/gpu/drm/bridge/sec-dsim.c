@@ -1445,6 +1445,10 @@ static int sec_mipi_dsim_get_pms(struct sec_mipi_dsim *dsim, unsigned long bit_c
 			s = 7;
 		p = denominator >> s;
 		m = numerator;
+		while (s && !(m & 1)) {
+			m >>= 1;
+			s--;
+		}
 		if ((denominator >= p_min) && (p <= p_max))
 			break;
 		i = 2;
@@ -1474,24 +1478,34 @@ static int sec_mipi_dsim_get_pms(struct sec_mipi_dsim *dsim, unsigned long bit_c
 		else
 			m <<= 1;
 	}
+	while (m > 125) {
+		if (s)
+			s--;
+		else if ((p >> 1) >= p_min)
+			p >>= 1;
+		else
+			break;
+		m = (m + 1) >> 1;
+	}
 #define OUTPUT_MIN_FREQ	350000000
 #define OUTPUT_MAX_FREQ	750000000
-	while (ref_clk * m < OUTPUT_MIN_FREQ * p) {
-		m <<= 1;
+	while ((ref_clk * m < OUTPUT_MIN_FREQ * p) || (m < 25)) {
+		if (m <= 125/2)
+			m <<= 1;
+		else if (p >> 1)
+			p >>= 1;
+		else
+			break;
 		s++;
 	}
 	while (ref_clk * m > OUTPUT_MAX_FREQ * p) {
 		if (!s)
 			break;
-		if (!(m & 1) || ((p << 1) > p_max))
-			m = (m + 1) >> 1;
-		else
+		if ((p << 1) <= p_max)
 			p <<= 1;
+		else
+			m = (m + 1) >> 1;
 		s--;
-	}
-	while (m < 25) {
-		m <<= 1;
-		s++;
 	}
 
 	if (p < 1  || p > 33 ||
