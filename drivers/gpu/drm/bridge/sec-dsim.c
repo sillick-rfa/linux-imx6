@@ -599,7 +599,7 @@ static int sec_mipi_choose_ref_clk(struct sec_mipi_dsim *dsim, unsigned long pix
 		while (ref_clk < MIN_FREQ)
 			ref_clk <<= 1;
 	}
-	while (ref_clk > 48000000) {
+	while (ref_clk > 6000000 * 33) {
 		ref_clk >>= 1;
 	}
 	return ref_clk;
@@ -1472,19 +1472,26 @@ static int sec_mipi_dsim_get_pms(struct sec_mipi_dsim *dsim, unsigned long bit_c
 		return -EINVAL;
 	}
 	while (p < p_min) {
-		p <<= 1;
 		if (s)
 			s--;
-		else
+		else if (m <= 125/2)
 			m <<= 1;
+		else {
+			m = (m * p_min + p - 1) / p;
+			p = p_min;
+			break;
+		}
+		p <<= 1;
 	}
 	while (m > 125) {
-		if (s)
+		if (s) {
 			s--;
-		else if ((p >> 1) >= p_min)
+		} else if ((p >> 1) >= p_min) {
 			p >>= 1;
-		else
+		} else {
+			m = 125;
 			break;
+		}
 		m = (m + 1) >> 1;
 	}
 #define OUTPUT_MIN_FREQ	350000000
