@@ -6,7 +6,7 @@
  * Copyright (c) 2016, NVIDIA CORPORATION.  All rights reserved.
  * Copyright 2015-2020 Cisco Systems, Inc. and/or its affiliates. All rights reserved.
  */
-
+#define DEBUG
 #include <linux/clk.h>
 #include <linux/delay.h>
 #include <linux/hdmi.h>
@@ -34,7 +34,7 @@
 
 #include "tc358840_regs.h"
 
-static int debug;
+static int debug = 2;
 module_param(debug, int, 0644);
 MODULE_PARM_DESC(debug, "debug level (0-3)");
 
