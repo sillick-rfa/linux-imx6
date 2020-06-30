@@ -88,6 +88,7 @@ struct tc358840_state {
 	struct media_pad pad[2];
 	struct v4l2_ctrl_handler hdl;
 	struct i2c_client *i2c_client;
+	struct regmap *regmap;
 	/* serialize between the poll function and ops */
 	struct mutex lock;
 	bool suspended;
@@ -3018,6 +3019,38 @@ static void tc358840_reset_gpio(struct tc358840_state *state, bool enable)
 	}
 }
 
+/* Regmap settings */
+static const struct regmap_range tc358840_regmap_range[] = {
+	regmap_reg_range(0x0000, 0x0007), /* Global Control Register */
+	regmap_reg_range(0x0014, 0x001B), /* Interrupt Register */
+	//regmap_reg_range(0x0028, 0x002B), /* CEC Clock Control  Register */
+	//regmap_reg_range(0x002C, 0x005B), /* IR Control Register */
+	//regmap_reg_range(0x0080, 0x008F), /* IO Control Register */
+	//regmap_reg_range(0x0108, 0x02AF), /* CSI0-TX Control Register */
+	//regmap_reg_range(0x0308, 0x04AF), /* CSI1-TX Control Register */
+	//regmap_reg_range(0x0510, 0x0515), /* CSI-TX Wrapper Register */
+	//regmap_reg_range(0x0600, 0x06CB), /* CEC Register */
+	//regmap_reg_range(0x5000, 0x5095), /* Splitter Register */
+	regmap_reg_range(0x7000, 0x7017), /* Internal Color Bar Register */
+	regmap_reg_range(0x8500, 0x8521), /* HDMI RX Register */
+	//regmap_reg_range(0x8410, 0x8844), /* HDMI RX Register */
+	//regmap_reg_range(0x8A00, 0x8AB1), /* Video Output Register */
+};
+
+static const struct regmap_access_table tc358840_regs = {
+	.yes_ranges = tc358840_regmap_range,
+	.n_yes_ranges = ARRAY_SIZE(tc358840_regmap_range),
+};
+
+static const struct regmap_config tc358840_regmap_config = {
+	.reg_bits	= 16,
+	.val_bits	= 8,
+	.max_register   = 0xffff,
+	.cache_type     = REGCACHE_NONE,
+	.rd_table       = &tc358840_regs,
+	.wr_table       = &tc358840_regs,
+};
+
 static int tc358840_probe(struct i2c_client *client,
 			  const struct i2c_device_id *id)
 {
@@ -3050,6 +3083,14 @@ static int tc358840_probe(struct i2c_client *client,
 	sd = &state->sd;
 
 	i2c_set_clientdata(client, state);
+
+	state->regmap = devm_regmap_init_i2c(client, &tc358840_regmap_config);
+	if (IS_ERR(state->regmap)) {
+		err = PTR_ERR(state->regmap);
+		dev_err(&client->dev, "Failed to allocate register map: %d\n",
+			err);
+		return err;
+	}
 
 	v4l2_i2c_subdev_init(sd, client, &tc358840_ops);
 	mutex_init(&state->lock);
