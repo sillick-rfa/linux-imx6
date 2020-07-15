@@ -44,10 +44,16 @@
 
 &i2c2 {
 	status = "disabled";
+	ov5640-mipi1@3c {
+		status = "disabled";
+	};
 };
 
 &i2c3 {
 	status = "disabled";
+	ov5640-mipi2@3c {
+		status = "disabled";
+	};
 };
 
 &sai1 {
