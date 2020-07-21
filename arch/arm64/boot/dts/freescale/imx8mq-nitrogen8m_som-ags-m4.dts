@@ -39,3 +39,23 @@
 &wdog3 {
 	status = "disabled";
 };
+
+&gpio1 {
+     status = "disabled";
+};
+
+&gpio2 {
+     status = "disabled";
+};
+
+&gpio3 {
+     status = "disabled";
+};
+
+&gpio4 {
+     status = "disabled";
+};
+
+&gpio5 {
+     status = "disabled";
+};
