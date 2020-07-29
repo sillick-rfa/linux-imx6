@@ -36,6 +36,10 @@
 	status = "disabled";
 };
 
+&uart4 {
+	status = "disabled";
+};
+
 &wdog3 {
 	status = "disabled";
 };
