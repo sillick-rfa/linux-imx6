@@ -117,7 +117,7 @@
 	pinctrl_usbotg1: usbotg1grp {
 		fsl,pins = <
 			MX8MM_IOMUXC_GPIO1_IO12_USB1_OTG_PWR		0x16
-			MX8MM_IOMUXC_GPIO1_IO13_USB1_OTG_OC		0x16
+			MX8MM_IOMUXC_GPIO1_IO13_USB1_OTG_OC		0x156
 #define GP_USB_UART_nXRES		<&gpio4 9 GPIO_ACTIVE_LOW>
 			MX8MM_IOMUXC_SAI1_RXD7_GPIO4_IO9		0x140
 		>;
@@ -157,6 +157,8 @@
 		/delete-property/ mipi_cmds_m101nwwb;
 		/delete-property/ mipi_dsi;
 		/delete-property/ mipi_to_lvds;
+		/delete-property/ pca9540;
+		/delete-property/ pca9546;
 		/delete-property/ pinctrl_com50h5n03ulc;
 		/delete-property/ pinctrl_lcd133_070;
 		/delete-property/ pinctrl_lcm_jm430;
@@ -246,7 +248,8 @@
 	/delete-node/ touchscreen@40;
 	/delete-node/ touchscreen@55;
 	/delete-node/ touchscreen@5d;
-	/delete-node/ i2cmux@70;
+	/delete-node/ i2cmux9540@70;
+	/delete-node/ i2cmux9546@70;
 	/delete-node/ codec@1a;
 };
 
