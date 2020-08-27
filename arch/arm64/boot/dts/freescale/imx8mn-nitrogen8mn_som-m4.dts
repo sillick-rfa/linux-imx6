@@ -3,10 +3,10 @@
  * Copyright 2020 Boundary Devices
  */
 
-#include "imx8mn-nitrogen8_nano.dts"
+#include "imx8mn-nitrogen8mn_som.dts"
 
 / {
-	model = "Boundary Devices i.MX8M Nano Nitrogen8_Nano M4";
+	model = "Boundary Devices i.MX 8M Nano Nitrogen8MN SoM M4";
 	compatible = "boundary,imx8mn-nitrogen8_nano-m4", "fsl,imx8mn";
 
 	reserved-memory {
