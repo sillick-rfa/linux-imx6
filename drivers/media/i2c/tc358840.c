@@ -50,19 +50,6 @@ MODULE_PARM_DESC(debug, "debug level (0-3)");
 #define POLLS_PER_SEC 5
 #define POLL_PERIOD (HZ / POLLS_PER_SEC)
 
-static const struct v4l2_dv_timings_cap tc358840_timings_cap_1080p60 = {
-	.type = V4L2_DV_BT_656_1120,
-	/* keep this initialization for compatibility with GCC < 4.4.6 */
-	.reserved = { 0 },
-	/* Pixel clock from REF_01 p. 20. */
-	V4L2_INIT_BT_TIMINGS(160, 1920, 120, 1200, 25000000, 165000000,
-			     V4L2_DV_BT_STD_CEA861 | V4L2_DV_BT_STD_DMT |
-			     V4L2_DV_BT_STD_GTF | V4L2_DV_BT_STD_CVT,
-			     V4L2_DV_BT_CAP_PROGRESSIVE |
-			     V4L2_DV_BT_CAP_REDUCED_BLANKING |
-			     V4L2_DV_BT_CAP_CUSTOM)
-};
-
 static const struct v4l2_dv_timings_cap tc358840_timings_cap_4kp30 = {
 	.type = V4L2_DV_BT_656_1120,
 	/* keep this initialization for compatibility with GCC < 4.4.6 */
@@ -680,10 +667,11 @@ out:
 static void tc358840_set_splitter(struct v4l2_subdev *sd)
 {
 	struct tc358840_state *state = to_state(sd);
+	struct tc358840_platform_data *pdata = &state->pdata;
 
 	v4l2_dbg(3, debug, sd, "%s():\n", __func__);
 
-	if (state->timings.bt.width <= 1920) {
+	if (pdata->csi_port != CSI_TX_BOTH) {
 		i2c_wr16_and_or(sd, SPLITTX0_CTRL,
 				~(u16)(MASK_IFEN | MASK_LCD_CSEL), MASK_SPBP);
 		i2c_wr16_and_or(sd, SPLITTX1_CTRL,
@@ -2274,11 +2262,7 @@ static int tc358840_subscribe_event(struct v4l2_subdev *sd, struct v4l2_fh *fh,
 static const struct v4l2_dv_timings_cap *
 tc358840_g_timings_cap(struct tc358840_state *state)
 {
-	struct tc358840_platform_data *pdata = &state->pdata;
-
-	if (pdata->csi_port == CSI_TX_BOTH)
-		return &tc358840_timings_cap_4kp30;
-	return &tc358840_timings_cap_1080p60;
+	return &tc358840_timings_cap_4kp30;
 }
 
 static int tc358840_g_input_status(struct v4l2_subdev *sd, u32 *status)
@@ -2310,7 +2294,8 @@ static int tc358840_s_dv_timings(struct v4l2_subdev *sd,
 		return -EINVAL;
 
 	if (debug)
-		v4l2_print_dv_timings(sd->name, "%s: ", timings, false);
+		v4l2_print_dv_timings(sd->name, "tc358840_s_dv_timings: ",
+				      timings, false);
 
 	if (state->test_pattern &&
 	    tc358840_set_test_pattern_timing(sd, timings)) {
@@ -2388,7 +2373,8 @@ static int tc358840_query_dv_timings(struct v4l2_subdev *sd,
 		return -ENOLCK;
 
 	if (debug)
-		v4l2_print_dv_timings(sd->name, "%s: ", timings, false);
+		v4l2_print_dv_timings(sd->name, "tc358840_query_dv_timings: ",
+				      timings, false);
 	if (!v4l2_valid_dv_timings(timings, tc358840_g_timings_cap(state),
 				   NULL, NULL)) {
 		v4l2_dbg(1, debug, sd, "%s: timings out of range\n", __func__);
@@ -2883,7 +2869,6 @@ static bool tc358840_parse_dt(struct tc358840_platform_data *pdata,
 	    of_property_read_u32(node, "tclk_postcnt", &pdata->tclk_postcnt) ||
 	    of_property_read_u32(node, "ths_trailcnt", &pdata->ths_trailcnt) ||
 	    of_property_read_u32(node, "hstxvregcnt", &pdata->hstxvregcnt) ||
-	    of_property_read_u32(node, "btacnt", &pdata->btacnt) ||
 	    of_property_read_u16(node, "pll_prd", &pdata->pll_prd) ||
 	    of_property_read_u16(node, "pll_frs", &pdata->pll_frs) ||
 	    of_property_read_u16(node, "pll_fbd", &pdata->pll_fbd))
@@ -2912,7 +2897,6 @@ static bool tc358840_parse_dt(struct tc358840_platform_data *pdata,
 	v4l_dbg(1, debug, client, "tclk_postcnt = %u\n", pdata->tclk_postcnt);
 	v4l_dbg(1, debug, client, "ths_trailcnt = %u\n", pdata->ths_trailcnt);
 	v4l_dbg(1, debug, client, "hstxvregcnt = %u\n", pdata->hstxvregcnt);
-	v4l_dbg(1, debug, client, "btacnt = %u\n", pdata->btacnt);
 	v4l_dbg(1, debug, client, "pll_prd = %u\n", pdata->pll_prd);
 	v4l_dbg(1, debug, client, "pll_frs = %u\n", pdata->pll_frs);
 	v4l_dbg(1, debug, client, "pll_fbd = %u\n", pdata->pll_fbd);
