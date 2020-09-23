@@ -212,21 +212,7 @@
 		>;
 	};
 
-	pinctrl_i2c4_pca9546: i2c4-pca9546grp {
-		fsl,pins = <
-#define GP_I2C4_PCA9546_RESET	<&gpio3 5 GPIO_ACTIVE_LOW>
-			MX8MQ_IOMUXC_NAND_CLE_GPIO3_IO5			0x46	/* Pin 151 */
-		>;
-	};
-
-	pinctrl_i2c4b_wm8960: i2c4b-wm8960grp {
-		fsl,pins = <
-#define GP_WM8960_HP_DET		<&gpio3 14 GPIO_ACTIVE_HIGH>
-			MX8MQ_IOMUXC_NAND_DQS_GPIO3_IO14		0x19	/* Pin 53 */
-		>;
-	};
-
-	pinctrl_i2c4d_rv4162: i2c4d-rv4162grp {
+	pinctrl_i2c4_rv4162: i2c4-rv4162grp {
 		fsl,pins = <
 #define GPIRQ_RV4162		<&gpio1 6 IRQ_TYPE_LEVEL_LOW>
 			MX8MQ_IOMUXC_GPIO1_IO06_GPIO1_IO6		0x49
@@ -629,26 +615,6 @@
 		enable-active-high;
 	};
 
-	sound-wm8960 {
-		compatible = "fsl,imx-audio-wm8960";
-		model = "wm8960-audio";
-		cpu-dai = <&sai1>;
-		codec-master;
-		audio-codec = <&wm8960>;
-		audio-routing =
-			"Headphone Jack", "HP_L",
-			"Headphone Jack", "HP_R",
-			"Ext Spk", "SPK_LP",
-			"Ext Spk", "SPK_LN",
-			"Ext Spk", "SPK_RP",
-			"Ext Spk", "SPK_RN",
-			"LINPUT1", "Main MIC",
-			"Main MIC", "MICB";
-		/* JD2: hp detect high for headphone*/
-		hp-det = <2 0>;
-		hp-det-gpios = GP_WM8960_HP_DET;
-	};
-
 	sound_hdmi: sound-hdmi {
 		compatible = "fsl,imx-audio-cdnhdmi";
 		model = "imx-audio-hdmi";
@@ -994,66 +960,10 @@
 	pinctrl-0 = <&pinctrl_i2c4>;
 	status = "okay";
 
-	i2cmux@70 {
-		compatible = "pca9546";
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_i2c4_pca9546>;
-		reg = <0x70>;
-		reset-gpios = GP_I2C4_PCA9546_RESET;
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		i2c4a: i2c4@0 {
-			reg = <0>;
-			#address-cells = <1>;
-			#size-cells = <0>;
-		};
-
-		i2c4b: i2c4@1 {
-			reg = <1>;
-			#address-cells = <1>;
-			#size-cells = <0>;
-		};
-
-		i2c4c: i2c4@2 {
-			reg = <2>;
-			#address-cells = <1>;
-			#size-cells = <0>;
-		};
-
-		i2c4d: i2c4@3 {
-			reg = <3>;
-			#address-cells = <1>;
-			#size-cells = <0>;
-		};
-	};
-};
-
-&i2c4a {
-	/* pciei */
-};
-
-&i2c4b {
-	wm8960: codec@1a {
-		compatible = "wlf,wm8960";
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_i2c4b_wm8960>;
-		reg = <0x1a>;
-		clocks = <&clk IMX8MQ_CLK_SAI1_ROOT>;
-		clock-names = "mclk";
-		wlf,shared-lrclk;
-	};
-};
-
-&i2c4c {
-	/* unused */
-};
-
-&i2c4d {
 	rtc@68 {
 		compatible = "microcrystal,rv4162";
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_i2c4d_rv4162>;
+		pinctrl-0 = <&pinctrl_i2c4_rv4162>;
 		reg = <0x68>;
 		interrupts-extended = GPIRQ_RV4162;
 		wakeup-source;
