@@ -118,6 +118,7 @@ dtb-$(CONFIG_ARCH_FSL_IMX8MQ) += fsl-imx8mq-ddr3l-arm2.dtb \
 				 fsl-imx8mq-evk-dp.dtb \
 				 fsl-imx8mq-evk-edp.dtb \
 				 imx8mq-bio.dtb \
+			  	 imx8mq-ds.dtb \
 				 imx8mq-nitrogen8m.dtb \
 				 imx8mq-nitrogen8m-edp.dtb \
 				 imx8mq-nitrogen8m-m4.dtb \
@@ -159,6 +160,7 @@ dtb-$(CONFIG_ARCH_FSL_IMX8MM) += fsl-imx8mm-evk.dtb \
 				 imx8mm-nitrogen8mm_som-mcp2518fd.dtb \
 				 imx8mm-nitrogen8mm_som-mcp25625.dtb \
 				 imx8mm-span.dtb \
+				 imx8mm-geno.dtb \
 
 dtb-$(CONFIG_ARCH_FSL_IMX8MN) += fsl-imx8mn-ddr4-evk.dtb \
 				 fsl-imx8mn-evk.dtb \
