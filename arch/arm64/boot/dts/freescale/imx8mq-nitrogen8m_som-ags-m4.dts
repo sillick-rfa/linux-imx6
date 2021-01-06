@@ -97,6 +97,18 @@
 	status = "disabled";
 };
 
+&pwm2 {
+	status = "disabled";
+};
+
+&pwm3 {
+	status = "disabled";
+};
+
+&pwm4 {
+	status = "disabled";
+};
+
 &reg_arm_dram {
 	/delete-property/ vsel-gpios;
 };
@@ -132,6 +144,10 @@
 };
 
 &uart2 {
+	status = "disabled";
+};
+
+&uart3 {
 	status = "disabled";
 };
 
